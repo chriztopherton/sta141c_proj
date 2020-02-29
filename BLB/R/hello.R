@@ -1,8 +1,10 @@
 #' Test function
 #' @exportB
-test <- function() {
+blb <- function(processing_type) {
 
   library(nycflights13)
+  library(tidyverse)
+
   set.seed(141)
   m <- 10
   groups <- sample(seq_len(m), nrow(flights), replace = TRUE)
@@ -23,10 +25,32 @@ test <- function() {
   each_boot <- function(i, data) {
     mean(sample(data, n, replace = TRUE), na.rm = TRUE)
   }
-  ci_list <- file_names %>% map(~ {
+
+# Note: Commented out to replace single core with parralel implementation
+#  ci_list <- file_names %>% map(~ {
+#    sub_dep_delay <- read_csv(.)$dep_delay
+#    map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>%
+#      quantile(c(0.025, 0.975))
+#  })
+#  reduce(ci_list, `+`) / length(ci_list)
+
+ # TODO error if processing type isn't specified or we can have a default
+  if (processing_type == "parallel") {
+    print("we're going to be using parallel processing")
+  } else {
+    print("user didn't specify processing type")
+  }
+
+  library(furrr)
+  plan(multiprocess)
+
+  ci_list <- file_names %>% future_map(~ {
     sub_dep_delay <- read_csv(.)$dep_delay
-    map_dbl(seq_len(r), each_boot, data = sub_dep_delay) %>%
+    map_dbl(seq_len(r), each_boot2, data = sub_dep_delay) %>%
       quantile(c(0.025, 0.975))
   })
   reduce(ci_list, `+`) / length(ci_list)
+
 }
+
+blb("parallel")
