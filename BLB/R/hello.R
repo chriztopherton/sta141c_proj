@@ -22,8 +22,16 @@ blb <- function(processing_type) {
 
   r <- 10  # r should be at least a few thousands, we are using 10 for demo
   n <- nrow(flights)
-  each_boot <- function(i, data) {
-    mean(sample(data, n, replace = TRUE), na.rm = TRUE)
+  
+  # each_boot <- function(i, data) {
+  #   mean(sample(data, n, replace = TRUE), na.rm = TRUE)
+  # }
+  
+  
+  each_boot2 <- function(i, data) {
+    non_missing_data <- data[!is.na(data)]
+    freqs <- rmultinom(1, n, rep(1, length(non_missing_data)))
+    sum(non_missing_data * freqs) / n
   }
 
 # Note: Commented out to replace single core with parralel implementation
