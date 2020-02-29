@@ -1,5 +1,5 @@
 #' Test function
-#' @export
+#' @exportB
 test <- function() {
 
   library(nycflights13)
