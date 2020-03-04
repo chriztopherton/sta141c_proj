@@ -1,0 +1,66 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(nycflights13)
+#library(Rmpi)
+library(parallel)
+library(tidyverse)
+library(furrr)
+plan(multiprocess)
+```
+
+```{r}
+#lectures
+
+#https://github.com/UCDavis-STA-141C-Winter-2020/sta141c-lectures/blob/master/02-18/blb.Rmd
+```
+
+```{r}
+cars = mtcars %>% select(mpg,disp,hp,drat,wt,qsec)
+set.seed(141)
+m <- 10
+groups <- sample(seq_len(m), nrow(cars), replace = TRUE)
+dir.create("cars/", showWarnings = FALSE)
+for (i in seq_len(m)) {
+  write_csv(filter(cars, groups == i), str_c("cars/", i, ".csv")) 
+}
+
+file_names <- file.path("cars", list.files("cars"))
+
+```
+
+
+```{r}
+r <- 10  # r should be at least a few thousands, we are using 10 for demo
+n <- nrow(cars)
+
+
+each_boot2 <- function(i, data) {
+  non_missing_data <- data[!is.na(data)]
+  freqs <- rmultinom(1, n, rep(1, length(non_missing_data)))
+  sum(non_missing_data * freqs) / n
+}
+```
+
+
+```{r}
+file_names %>% future_map(~ {
+    sub_dep_delay <- read_csv(.)})
+```
+```{r}
+cars
+```
+
+
+```{r}
+summary(lm(mpg ~.,data= mtcars)) #this takes intoa account all the predictor variables and its rows
+
+# we want to bootstrap the rows, selecting subsamples at a time and pass them into the above multiple linear model
+
+#then for example: the regression coefficient estimate for cyl would be: -0.11144 +/- ....
+```
+
