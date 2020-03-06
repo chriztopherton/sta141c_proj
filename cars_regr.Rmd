@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Multi Reg Parallelization"
 output: html_document
 ---
 
@@ -10,57 +10,149 @@ library(nycflights13)
 library(parallel)
 library(tidyverse)
 library(furrr)
-plan(multiprocess)
+library(purrr)
+plan(multiprocess,workers = 4)
 ```
 
+# CLEAN "FLIGHTS" DATA
 ```{r}
-#lectures
-
-#https://github.com/UCDavis-STA-141C-Winter-2020/sta141c-lectures/blob/master/02-18/blb.Rmd
+flights = flights[complete.cases(flights),] %>% mutate(time = hour*60 + minute) %>% select(dep_delay,arr_delay,distance,time)
 ```
 
+# APPLY BLB AND WRITE SUBSAMPLES TO CSV'S
 ```{r}
-cars = mtcars %>% select(mpg,disp,hp,drat,wt,qsec)
+#cars = mtcars %>% select(mpg,disp,hp,drat,wt,qsec)
 set.seed(141)
-m <- 10
+m <- 5
 groups <- sample(seq_len(m), nrow(cars), replace = TRUE)
-dir.create("cars/", showWarnings = FALSE)
-for (i in seq_len(m)) {
-  write_csv(filter(cars, groups == i), str_c("cars/", i, ".csv")) 
+
+map(seq_len(m),~write_csv(flights[groups==.,],str_c("flights",.,".csv")))
+
+```
+
+# ESTIMATE BETAS USING LIN ALG FOR 1 SUBSAMPLE
+```{r message=FALSE, warning=FALSE}
+calc_coef_blb <- function(response,subsample, freqs) {
+  
+  res = paste(response)
+  names = colnames(subsample)
+  # #predictor variables are subsetted
+  not_res = names[!grepl(paste(res),names)]
+  y= subsample[,res]
+  x = subsample[,not_res]
+  
+  y = as.matrix(y)
+  x = cbind(rep(1,nrow(subsample1)),as.matrix(x)) 
+  
+  betas = solve(t(x) %*% x) %*% t(x) %*% y %>% data.frame() 
+  betas[,1]  #need a vector to be returned, only ints
+  
 }
 
-file_names <- file.path("cars", list.files("cars"))
+subsample = read_csv(str_c("flights",2,".csv"))
+freqs = rmultinom(1,n,rep(1,nrow(subsample)))
+calc_coef_blb("time",subsample,freqs)
+```
 
+# ESTIMATE BETAS USING LM() FOR 1 SUBSAMPLE, ANSWER SHOULD BE SAME AS ABOVE
+
+```{r message=FALSE, warning=FALSE}
+subsample = read_csv(str_c("flights",2,".csv"))
+response= "time"
+res = paste(response)
+names = colnames(subsample)
+# #predictor variables are subsetted
+not_res = names[!grepl(paste(res),names)]
+y= subsample[,res]
+x = subsample[,not_res]
+freqs = rmultinom(1,n,rep(1,nrow(subsample)))
+summary(lm(time ~.,data.frame(y,x)))$coef
+```
+#################################### TESTING ############################################################
+
+```{r message=FALSE, warning=FALSE}
+subsample = read_csv(str_c("flights",2,".csv"))
+response="time"
+res = paste(response)
+names = colnames(subsample)
+# #predictor variables are subsetted
+not_res = names[!grepl(paste(res),names)]
+y= subsample[,res]
+x = subsample[,not_res]
+
+y = as.matrix(y)
+x = cbind(rep(1,nrow(subsample1)),as.matrix(x)) 
+
+betas = solve(t(x) %*% x) %*% t(x) %*% y %>% data.frame() 
+betas[,1] 
 ```
 
 
 ```{r}
-r <- 10  # r should be at least a few thousands, we are using 10 for demo
-n <- nrow(cars)
-
-
-each_boot2 <- function(i, data) {
-  non_missing_data <- data[!is.na(data)]
-  freqs <- rmultinom(1, n, rep(1, length(non_missing_data)))
-  sum(non_missing_data * freqs) / n
+B= 40
+singleBoots <- function(i,ind_part){
+  subsample = read_csv(str_c("flights",ind_part,".csv"))
+  freqs = rmultinom(1,n,rep(1,nrow(subsample)))
+  calc_coef_blb("time",subsample,freqs)
+  
 }
+
+ci_list = future_map(seq_len(m),~{
+  map_dbl(seq_len(B),singleBoots,ind_part=.) %>% 
+    quantile(c(0.025,0.975))
+})
+
+reduce(ci_list,`+`) / length(ci_list)
 ```
 
 
-```{r}
-file_names %>% future_map(~ {
-    sub_dep_delay <- read_csv(.)})
-```
-```{r}
-cars
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ```{r}
-summary(lm(mpg ~.,data= mtcars)) #this takes intoa account all the predictor variables and its rows
-
-# we want to bootstrap the rows, selecting subsamples at a time and pass them into the above multiple linear model
+# r <- 10  # r should be at least a few thousands, we are using 10 for demo
+# n <- nrow(cars)
+# 
+# 
+# each_boot2 <- function(i, data) {
+#   non_missing_data <- data[!is.na(data)]
+#   freqs <- rmultinom(1, n, rep(1, length(non_missing_data)))  #Generate multinomially distributed random number vectors and compute multinomial probabilities.
+#   sum(non_missing_data * freqs) / n
+# }
+# 
+# each_boot2(i,cars)
+# 
+# file_names %>% future_map(~ {
+#     sub_dep_delay <- read_csv(.)
+#       })
+# 
+# 
+# 
+# 
+# 
+# summary(lm(mpg ~.,data= mtcars)) #this takes intoa account all the predictor variables and its rows
+# 
+# # we want to bootstrap the rows, selecting subsamples at a time and pass them into the above multiple linear model
 
 #then for example: the regression coefficient estimate for cyl would be: -0.11144 +/- ....
 ```
+
+
 
