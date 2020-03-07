@@ -30,7 +30,7 @@ set.seed(141)
 n <- 1e6
 m <- 5
 groups <- sample(seq_len(m), nrow(cars), replace = TRUE)
-map(seq_len(m),~write_csv(flights[groups==.,],str_c("flights",.,".csv")))
+map(seq_len(m),~write_csv(flights[groups==.,],str_c("part",.,".csv")))
 ```
 
 
@@ -40,6 +40,7 @@ head(flights)
 
 # ESTIMATE BETAS USING LIN ALG FOR 1 SUBSAMPLE
 ```{r message=FALSE, warning=FALSE}
+n <- 1e6
 calc_coef_blb <- function(response,subsample, freqs) {
   
   res = paste(response)
@@ -56,7 +57,7 @@ calc_coef_blb <- function(response,subsample, freqs) {
   betas[,1]  #need a vector to be returned, only ints
   
 }
-subsample = read_csv(str_c("flights",2,".csv"))
+subsample = read_csv(str_c("part",2,".csv"))
 freqs = rmultinom(1,n,rep(1,nrow(subsample)))
 calc_coef_blb("time",subsample,freqs)
 ```
@@ -64,7 +65,7 @@ calc_coef_blb("time",subsample,freqs)
 # ESTIMATE BETAS USING LM() FOR 1 SUBSAMPLE, ANSWER SHOULD BE SAME AS ABOVE
 
 ```{r message=FALSE, warning=FALSE}
-subsample = read_csv(str_c("flights",2,".csv"))
+subsample = read_csv(str_c("part",2,".csv"))
 response= "time"
 res = paste(response)
 names = colnames(subsample)
@@ -78,7 +79,7 @@ summary(lm(time ~.,data.frame(y,x)))$coef
 #################################### TESTING ############################################################
 
 ```{r message=FALSE, warning=FALSE}
-subsample = read_csv(str_c("flights",2,".csv"))
+subsample = read_csv(str_c("part",2,".csv"))
 response="time"
 res = paste(response)
 names = colnames(subsample)
@@ -96,7 +97,7 @@ betas[,1]
 ```{r}
 B= 40
 singleBoots <- function(i,ind_part){
-  subsample = read_csv(str_c("flights",ind_part,".csv"))
+  subsample = read_csv(str_c("part",ind_part,".csv"))
   freqs = rmultinom(1,n,rep(1,nrow(subsample)))
   calc_coef_blb("time",subsample,freqs)
   
@@ -122,14 +123,6 @@ mean(coef_est[,4])
 ```
 
 
-
-```{r}
-ci_list = future_map(seq_len(m),~{
-  map_dbl(seq_len(B),singleBoots,ind_part=.) %>% 
-    quantile(c(0.025,0.975))
-})
-reduce(ci_list,`+`) / length(ci_list)
-```
 
 
 
