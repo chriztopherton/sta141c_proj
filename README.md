@@ -1,18 +1,19 @@
-##Package: 
+#Package: 
 - BLB
 
-##Type: 
+#Type: 
 - Package
 
-##Title: 
+#Title: 
 - Bag of Little Bootstrapped Regressions
 
 
-Author: Christopher Ton, Zhuoheng Han, Samuel Krut
+#Author: 
+- Christopher Ton, Zhuoheng Han, Samuel Krut
 
-##Maintainer:  chrton@ucdavis.edu
+#Maintainer:  chrton@ucdavis.edu
 
-##Description: 
+#Description: 
     
     - The package takes in a numeric dataframe as input and predicts a response variable defined by the user as "y".
     Assuming that the data is signifcantly large enough, either parallel or distributed computing will be chosen to aid 
@@ -20,13 +21,13 @@ Author: Christopher Ton, Zhuoheng Han, Samuel Krut
     overall confidence interval for the regression coefficients are determined. Furthermore, the package would
     also estimate the confidence interval for prediction, given a row vector and matrix of explanatory input variables.
 
-##License: 
+#License: 
 - GPL-3
 
-##Encoding: 
+#Encoding: 
 - UTF-8
 
-##LazyData: 
+#LazyData: 
 - true
 
 #RoxygenNote: 
