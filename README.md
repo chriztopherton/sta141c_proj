@@ -1,14 +1,18 @@
 #Package: 
+
 - BLB
 
 #Type: 
+
 - Package
 
 #Title: 
+
 - Bag of Little Bootstrapped Regressions
 
 
 #Author: 
+
 - Christopher Ton, Zhuoheng Han, Samuel Krut
 
 #Maintainer:  chrton@ucdavis.edu
@@ -22,18 +26,23 @@
     also estimate the confidence interval for prediction, given a row vector and matrix of explanatory input variables.
 
 #License: 
+
 - GPL-3
 
 #Encoding: 
+
 - UTF-8
 
 #LazyData: 
+
 - true
 
 #RoxygenNote: 
+
 - 7.0.2
 
 #Suggests: 
+
     - knitr,
     rmarkdown,
     parallel,
@@ -41,4 +50,5 @@
     furrr
 
 #VignetteBuilder: 
+
 - knitr
