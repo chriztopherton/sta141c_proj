@@ -1,0 +1,34 @@
+---
+title: "demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{demo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(BLBMR)
+```
+
+```{r}
+?BLBMR
+?coef_ci
+
+```
+
+```{r}
+?pred_ci
+```
+
+```{r}
+data.frame(dep_delay = c(2,3), arr_delay = c(10,-15), distance = c(3,500))
+```
+

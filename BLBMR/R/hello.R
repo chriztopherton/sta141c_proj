@@ -1,9 +1,15 @@
 #' 'Finds the CI for regression coefficients'
+#'
+#' @description confidence interval for betas, multivariate regression coefficients
+#'
+#' @param data with y = input$response, and x = input$subsetted_columns
+#'
 #' @export
-
-
-
-#----------------------------------------------------------------------------------------------------------------------------------------
+#'
+#' @examples y= flights$time
+#' x = flights[,c(1:3)]
+#' data  = data.frame(y,x)
+#' coef_ci(data)
 coef_ci <- function(data){
   set.seed(141)
   m <- 10
@@ -33,10 +39,18 @@ coef_ci <- function(data){
   }
 }
 
-#----------------------------------------------------------------------------------------------------------------------------------------
-
 #' 'Finds the CI for new prediction'
+#'
+#' @description confidence interval for new prediction
+#'
+#' @param data same data used as input for coef_ci
+#'
+#' @param newdata a dataframe with test input values for the explanatory columns
+#'
 #' @export
+#'
+#' @examples newdata = data.frame(dep_delay = c(2,3), arr_delay = c(13,-15), distance = c(450,500))
+#' pred_ci(data,newdata)
 
 pred_ci <- function(data, newdata){
   set.seed(141)
@@ -64,11 +78,3 @@ pred_ci <- function(data, newdata){
   })
   print( reduce(ci_list, `+`)/length(ci_list))
 }
-
-#----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
