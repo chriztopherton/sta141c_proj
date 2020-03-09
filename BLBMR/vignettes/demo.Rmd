@@ -14,21 +14,29 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(BLBMR)
+```{r setup,include=FALSE}
+library(BLMR)
+library(nycflights13)
+library(parallel)
+library(tidyverse)
+library(furrr)
+flights = flights[complete.cases(flights),] %>%
+  mutate(time = hour*60 + minute) %>%
+  select(dep_delay,arr_delay,distance,time)
 ```
 
-```{r}
-?BLBMR
-?coef_ci
 
+```{r message=FALSE, warning=FALSE}
+head(flights)
+y = flights$time #response variable defined
+x = flights[,c(1:3)] #predictor variables subsetted
+data = data.frame(y,x)
+coef_ci(data) #function being applied
+#prediction CI on new data
+newdata = data.frame(dep_delay = 3,arr_delay = -15,distance = 500)
+pred_ci(data,newdata)
 ```
 
-```{r}
-?pred_ci
-```
 
-```{r}
-data.frame(dep_delay = c(2,3), arr_delay = c(10,-15), distance = c(3,500))
-```
+
 
